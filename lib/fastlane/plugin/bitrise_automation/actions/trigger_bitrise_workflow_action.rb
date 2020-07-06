@@ -7,7 +7,7 @@ module Fastlane
       def self.run(params)
         UI.verbose("Requesting new Bitrise.io build...")
 
-        build_request_payload = {
+        response = Helper::BitriseRequestHelper.post(params, 'builds', {
           hook_info: {
             type: "bitrise"
           },
@@ -16,8 +16,7 @@ module Fastlane
             commit_hash: params[:commit_hash],
             commit_message: params[:build_message]
           }
-        }.to_json
-        response = Helper::BitriseRequestHelper.post(params, 'builds', build_request_payload)
+        }.to_json)
 
         if response.code == "201"
           json_response = JSON.parse(response.body)

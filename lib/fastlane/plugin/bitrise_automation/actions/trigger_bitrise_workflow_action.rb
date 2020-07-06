@@ -28,11 +28,41 @@ module Fastlane
           UI.crash!("Error requesting new build on Bitrise.io. Status code: #{response.code}. #{response}")
         end
 
+        build_status_code = 0
+
         build_infos = {}
         build_infos["status"] = json_response["status"]
         build_infos["build_url"] = json_response["build_url"]
         build_infos["build_number"] = json_response["build_number"]
         build_infos["build_slug"] = json_response["build_slug"]
+
+        unless params[:async]
+          loop do
+            status_response = Helper::BitriseRequestHelper.get(params, "builds/#{build_infos['build_slug']}")
+            status_json_response = JSON.parse(status_response.body)['data']
+            build_status_code = status_json_response['status']
+
+            if build_status_code != 0
+              build_infos["status"] = status_json_response["status_text"]
+              break
+            end
+
+            if status_json_response['is_on_hold']
+              UI.message("Build is still on hold. Sleeping...")
+            else
+              UI.message("Build is running with status '#{status_json_response['status_text']}'. Sleeping...")
+            end
+
+            sleep(15)
+          end
+
+          if build_status_code == 1
+            UI.success("Build has finished successfully on Bitrise!")
+          elsif build_status_code == 2
+            UI.build_failure!("Build has FAILED. Check Bitrise for details.")
+          end
+        end
+
         build_infos
       end
 
@@ -78,8 +108,9 @@ module Fastlane
           FastlaneCore::ConfigItem.new(key: :async,
                                   env_name: "BITRISE_AUTOMATION_ASYNC",
                                description: "Whether the action should return immediately after requesting the build or wait until it finishes running",
-                                  optional: false,
-                                      type: Boolean)
+                                  optional: true,
+                                      type: Boolean,
+                             default_value: true)
         ]
       end
 

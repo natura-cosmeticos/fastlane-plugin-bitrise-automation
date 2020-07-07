@@ -28,8 +28,6 @@ module Fastlane
           UI.crash!("Error requesting new build on Bitrise.io. Status code: #{response.code}. #{response}")
         end
 
-        build_status_code = 0
-
         build_infos = {}
         build_infos["status"] = json_response["status"]
         build_infos["build_url"] = json_response["build_url"]
@@ -37,28 +35,12 @@ module Fastlane
         build_infos["build_slug"] = json_response["build_slug"]
 
         unless params[:async]
-          loop do
-            status_response = Helper::BitriseRequestHelper.get(params, "builds/#{build_infos['build_slug']}")
-            status_json_response = JSON.parse(status_response.body)['data']
-            build_status_code = status_json_response['status']
+          build_status = self.wait_until_build_completion(params, build_infos["build_slug"])
 
-            if build_status_code != 0
-              build_infos["status"] = status_json_response["status_text"]
-              break
-            end
-
-            if status_json_response['is_on_hold']
-              UI.message("Build is still on hold. Sleeping...")
-            else
-              UI.message("Build is running with status '#{status_json_response['status_text']}'. Sleeping...")
-            end
-
-            sleep(15)
-          end
-
-          if build_status_code == 1
+          if build_status["status"] == 1
             UI.success("Build has finished successfully on Bitrise!")
-          elsif build_status_code == 2
+            build_infos["status"] = build_status["status_text"]
+          elsif build_status["status"] == 2
             UI.build_failure!("Build has FAILED. Check Bitrise for details.")
           end
         end
@@ -66,8 +48,28 @@ module Fastlane
         build_infos
       end
 
+      def self.wait_until_build_completion(params, build_slug)
+        build_status = {}
+        loop do
+          build_status_params = params.clone
+          build_status_params[:build_slug] = build_slug
+          build_status = GetBitriseBuildStatusAction.run(build_status_params)
+
+          break if build_status['status'] != 0
+
+          if build_status['is_on_hold']
+            UI.message("Build is still on hold. Sleeping...")
+          else
+            UI.message("Build is running with status '#{build_status['status_text']}'. Sleeping...")
+          end
+
+          sleep(30)
+        end
+        build_status
+      end
+
       def self.description
-        "Trigger a Bitrise workflow with the specified parameters"
+        "Trigger a Bitrise workflow with the specified parameters, synchronously or asynchronously"
       end
 
       def self.authors

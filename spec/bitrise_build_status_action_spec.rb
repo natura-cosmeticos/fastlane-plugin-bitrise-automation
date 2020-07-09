@@ -1,4 +1,4 @@
-describe Fastlane::Actions::GetBitriseBuildStatusAction do
+describe Fastlane::Actions::BitriseBuildStatusAction do
   describe 'get bitrise build status' do
     it 'calls the Bitrise API with the provided parameters and returns build info' do
       build_details_success = {
@@ -11,7 +11,7 @@ describe Fastlane::Actions::GetBitriseBuildStatusAction do
       stub_request(:get, "https://api.bitrise.io/v0.1/apps/appslug123/builds/build789").
         to_return(body: build_details_success, status: 200)
 
-      response = Fastlane::Actions::GetBitriseBuildStatusAction.run(
+      response = Fastlane::Actions::BitriseBuildStatusAction.run(
         app_slug: "appslug123",
         build_slug: "build789"
       )
@@ -26,7 +26,7 @@ describe Fastlane::Actions::GetBitriseBuildStatusAction do
         to_return(body: '{}', status: 400)
 
       expect do
-        Fastlane::Actions::GetBitriseBuildStatusAction.run(
+        Fastlane::Actions::BitriseBuildStatusAction.run(
           app_slug: "appslug123",
           build_slug: "build789"
         )

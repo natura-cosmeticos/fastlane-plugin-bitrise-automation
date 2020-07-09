@@ -3,7 +3,7 @@ require_relative '../helper/bitrise_automation_helper'
 
 module Fastlane
   module Actions
-    class GetBitriseBuildStatusAction < Action
+    class BitriseBuildStatusAction < Action
       def self.run(params)
         response = Helper::BitriseRequestHelper.get(params, "builds/#{params[:build_slug]}")
 

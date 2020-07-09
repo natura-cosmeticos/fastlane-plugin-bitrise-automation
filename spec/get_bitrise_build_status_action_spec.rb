@@ -1,4 +1,4 @@
-describe Fastlane::Actions::TriggerBitriseWorkflowAction do
+describe Fastlane::Actions::GetBitriseBuildStatusAction do
   describe 'get bitrise build status' do
     it 'calls the Bitrise API with the provided parameters and returns build info' do
       build_details_success = {

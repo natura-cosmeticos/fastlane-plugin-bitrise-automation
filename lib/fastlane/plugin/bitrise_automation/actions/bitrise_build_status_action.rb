@@ -13,6 +13,8 @@ module Fastlane
 
         if response.code == "200"
           json_response = JSON.parse(response.body)['data']
+          FastlaneCore::PrintTable.print_values(config: json_response,
+                                                title: "Bitrise build #{build_slug} status")
         else
           UI.crash!("Error fetching build status on Bitrise.io. Status code: #{response.code}. #{response}")
         end

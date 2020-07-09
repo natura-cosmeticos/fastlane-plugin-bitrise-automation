@@ -8,11 +8,11 @@ Gem::Specification.new do |spec|
   spec.name          = 'fastlane-plugin-bitrise_automation'
   spec.version       = Fastlane::BitriseAutomation::VERSION
   spec.author        = 'Mario Cecchi'
-  spec.email         = 'macecchi@gmail.com'
+  spec.email         = 'mcecchi@thoughtworks.com'
 
-  spec.summary       = 'sei la'
-  # spec.homepage      = "https://github.com/<GITHUB_USERNAME>/fastlane-plugin-bitrise_automation"
-  spec.license       = "MIT"
+  spec.summary       = 'Trigger builds on Bitrise, check their status and download artifacts using Fastlane'
+  spec.homepage      = "https://github.com/natura-cosmeticos/fastlane-plugin-bitrise-automation"
+  spec.license       = "ISC"
 
   spec.files         = Dir["lib/**/*"] + %w(README.md LICENSE)
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})

@@ -12,15 +12,28 @@ fastlane add_plugin bitrise_automation
 
 ## About bitrise_automation
 
-sei la
+Interact with [Bitrise](https://bitrise.io/) projects from fastlane.
 
-**Note to author:** Add a more detailed description about this plugin here. If your plugin contains multiple actions, make sure to mention them here.
+This is useful if you want to interact with Bitrise from your terminal using Fastlane or if you are encapsulating Bitrise builds from another CI (such as Jenkins).
+
+This plugin assumes you already have an app configured on Bitrise and uses a Personal Access Token from Bitrise to communicate with the Bitrise API. Check the [official documentation](https://devcenter.bitrise.io/api/authentication/) to learn how to acquire a token.
+
+### Features
+
+- Trigger a workflow asynchronously (returning immediately after build has been requested)
+- Trigger a workflow synchronously (waiting until the build executes and finishes)
+- Check build success/failure (exiting with success or failure according to the status on Bitrise)
+- Retrieve the list of artifacts from a build
+- Download the artifacts produced by a build
+
+### Known issues
+
+- Pagination on API responses is not implemented
+
 
 ## Example
 
 Check out the [example `Fastfile`](fastlane/Fastfile) to see how to use this plugin. Try it by cloning the repo, running `fastlane install_plugins` and `bundle exec fastlane test`.
-
-**Note to author:** Please set up a sample project to make it easy for users to explore what your plugin does. Provide everything that is necessary to try out the plugin in this project (including a sample Xcode/Android project if necessary)
 
 ## Run tests for this plugin
 

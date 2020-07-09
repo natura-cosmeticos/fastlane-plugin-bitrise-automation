@@ -1,3 +1,16 @@
+# Set the app slug and Bitrise using access token using the environment variables
+# BITRISE_APP_SLUG
+# BITRISE_ACCESS_TOKEN
+
 lane :test do
-  trigger_bitrise_workflow
+  build = trigger_bitrise_workflow(
+    workflow: "build",
+    build_message: "Build triggered from Fastlane :)",
+    wait_for_build: true # Disable this if you don't need to wait for the build results
+  )
+
+  bitrise_build_artifacts(
+    build_slug: build['build_slug'],
+    download: true
+  )
 end

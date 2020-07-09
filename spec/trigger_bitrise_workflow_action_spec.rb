@@ -1,16 +1,16 @@
+build_created_response = {
+  "build_number" => 100,
+  "build_slug" => "abc123",
+  "build_url" => "http://example.com/builds/100",
+  "message" => "string",
+  "service" => "string",
+  "slug" => "13673618",
+  "status" => "on_hold",
+  "triggered_workflow" => "workflow_name"
+}.to_json
+
 describe Fastlane::Actions::TriggerBitriseWorkflowAction do
   describe 'trigger bitrise build' do
-    build_created_response = {
-      "build_number" => 100,
-      "build_slug" => "abc123",
-      "build_url" => "http://example.com/builds/100",
-      "message" => "string",
-      "service" => "string",
-      "slug" => "13673618",
-      "status" => "on_hold",
-      "triggered_workflow" => "workflow_name"
-    }.to_json
-
     it 'calls the Bitrise API with the provided parameters and returns build info' do
       expected_request_payload = {
         hook_info: {
@@ -28,10 +28,10 @@ describe Fastlane::Actions::TriggerBitriseWorkflowAction do
 
       response = Fastlane::Actions::TriggerBitriseWorkflowAction.run(
         app_slug: "appslug123",
-        workflow_name: "workflow_name",
+        workflow: "workflow_name",
         commit_hash: "commit_hash",
         build_message: "build_message",
-        async: true
+        wait_for_build: false
       )
 
       expect(response['status']).to eq("on_hold")
@@ -47,15 +47,17 @@ describe Fastlane::Actions::TriggerBitriseWorkflowAction do
       expect do
         response = Fastlane::Actions::TriggerBitriseWorkflowAction.run(
           app_slug: "appslug123",
-          workflow_name: "workflow_name",
+          workflow: "workflow_name",
           commit_hash: "commit_hash",
           build_message: "build_message",
-          async: true
+          wait_for_build: false
         )
       end.to raise_error(FastlaneCore::Interface::FastlaneCrash)
     end
+  end
 
-    it 'when async is false, queries the status after triggering the build' do
+  describe 'when wait_for_build is turned on' do
+    it 'queries the status after triggering the build' do
       build_details_success = {
         "data" => {
           "is_on_hold" => false,
@@ -70,16 +72,16 @@ describe Fastlane::Actions::TriggerBitriseWorkflowAction do
 
       response = Fastlane::Actions::TriggerBitriseWorkflowAction.run(
         app_slug: "appslug123",
-        workflow_name: "workflow_name",
+        workflow: "workflow_name",
         commit_hash: "commit_hash",
         build_message: "build_message",
-        async: false
+        wait_for_build: true
       )
 
       expect(response['status']).to eq("success")
     end
 
-    it 'when async is false, queries the status until build is finished' do
+    it 'queries the status repeatedly until build has finished' do
       allow_any_instance_of(Object).to receive(:sleep)
       build_details_waiting = {
         "data" => {
@@ -102,16 +104,16 @@ describe Fastlane::Actions::TriggerBitriseWorkflowAction do
 
       response = Fastlane::Actions::TriggerBitriseWorkflowAction.run(
         app_slug: "appslug123",
-        workflow_name: "workflow_name",
+        workflow: "workflow_name",
         commit_hash: "commit_hash",
         build_message: "build_message",
-        async: false
+        wait_for_build: true
       )
 
       expect(response['status']).to eq("success")
     end
 
-    it 'when async is false, if builds returns a failed status the action should raise build failure' do
+    it 'throws a build failure error if the build has failed' do
       allow_any_instance_of(Object).to receive(:sleep)
       build_details_failure = {
         "data" => {
@@ -128,10 +130,10 @@ describe Fastlane::Actions::TriggerBitriseWorkflowAction do
       expect do
         response = Fastlane::Actions::TriggerBitriseWorkflowAction.run(
           app_slug: "appslug123",
-          workflow_name: "workflow_name",
+          workflow: "workflow_name",
           commit_hash: "commit_hash",
           build_message: "build_message",
-          async: false
+          wait_for_build: true
         )
       end.to raise_error(FastlaneCore::Interface::FastlaneBuildFailure)
     end

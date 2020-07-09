@@ -28,6 +28,9 @@ This plugin assumes you already have an app configured on Bitrise and uses a Per
 
 ### Known issues
 
+- For now the only option is to trigger a build via a commit hash. It should be more flexible as Bitrise allows triggering by branch, tag, commit or default strategy.
+- The author option to trigger the build is not implemented
+- The environments option to trigger the build is not implemented
 - Pagination on API responses is not implemented
 
 

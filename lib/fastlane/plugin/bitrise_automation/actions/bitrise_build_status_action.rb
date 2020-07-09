@@ -5,7 +5,11 @@ module Fastlane
   module Actions
     class BitriseBuildStatusAction < Action
       def self.run(params)
-        response = Helper::BitriseRequestHelper.get(params, "builds/#{params[:build_slug]}")
+        get_status(params, params[:build_slug])
+      end
+
+      def self.get_status(params, build_slug)
+        response = Helper::BitriseRequestHelper.get(params, "builds/#{build_slug}")
 
         if response.code == "200"
           json_response = JSON.parse(response.body)['data']
@@ -35,17 +39,17 @@ module Fastlane
       def self.available_options
         [
           FastlaneCore::ConfigItem.new(key: :app_slug,
-                                  env_name: "BITRISE_AUTOMATION_APP_SLUG",
+                                  env_name: "BITRISE_APP_SLUG",
                                description: "The app slug of the project on Bitrise",
                                   optional: false,
                                       type: String),
           FastlaneCore::ConfigItem.new(key: :access_token,
-                                  env_name: "BITRISE_AUTOMATION_ACCESS_TOKEN",
+                                  env_name: "BITRISE_ACCESS_TOKEN",
                                description: "The personal access token used to call Bitrise API",
                                   optional: false,
                                       type: String),
           FastlaneCore::ConfigItem.new(key: :build_slug,
-                                  env_name: "BITRISE_AUTOMATION_BUILD_SLUG",
+                                  env_name: "BITRISE_BUILD_SLUG",
                                description: "The slug that identifies the build on Bitrise",
                                   optional: false,
                                       type: String)

@@ -64,6 +64,8 @@ describe Fastlane::Actions::BitriseBuildArtifactsAction do
   end
 
   describe 'artifact download' do
+    expected_download_dir = 'artifacts'
+
     before(:each) do
       stub_request(:get, "https://api.bitrise.io/v0.1/apps/appslug123/builds/build789/artifacts").
         to_return(body: build_artifacts_success, status: 200)
@@ -74,7 +76,7 @@ describe Fastlane::Actions::BitriseBuildArtifactsAction do
     end
 
     it 'creates the artifacts directory if it does not already exist' do
-      allow(Dir).to receive(:exist?).with('artifacts').and_return(false)
+      allow(Dir).to receive(:exist?).with(expected_download_dir).and_return(false)
       allow(Dir).to receive(:mkdir)
 
       response = Fastlane::Actions::BitriseBuildArtifactsAction.run(
@@ -83,11 +85,11 @@ describe Fastlane::Actions::BitriseBuildArtifactsAction do
         download: true
       )
 
-      expect(Dir).to have_received(:mkdir).with('artifacts')
+      expect(Dir).to have_received(:mkdir).with(expected_download_dir)
     end
 
     it 'does not create the artifacts directory if it already exists' do
-      allow(Dir).to receive(:exist?).with('artifacts').and_return(true)
+      allow(Dir).to receive(:exist?).with(expected_download_dir).and_return(true)
       allow(Dir).to receive(:mkdir)
 
       response = Fastlane::Actions::BitriseBuildArtifactsAction.run(
@@ -96,11 +98,11 @@ describe Fastlane::Actions::BitriseBuildArtifactsAction do
         download: true
       )
 
-      expect(Dir).not_to(have_received(:mkdir).with('artifacts'))
+      expect(Dir).not_to(have_received(:mkdir).with(expected_download_dir))
     end
 
     it 'fetches artifact details and downloads them when the download flag is on' do
-      allow(Dir).to receive(:exist?).with('artifacts').and_return(true)
+      allow(Dir).to receive(:exist?).with(expected_download_dir).and_return(true)
       allow(Dir).to receive(:mkdir)
       allow(Fastlane::Actions::BitriseBuildArtifactsAction).to receive(:sh)
 
@@ -114,7 +116,7 @@ describe Fastlane::Actions::BitriseBuildArtifactsAction do
     end
 
     it 'crashes if fetching artifact details returns an unexpected response' do
-      allow(Dir).to receive(:exist?).with('artifacts').and_return(true)
+      allow(Dir).to receive(:exist?).with(expected_download_dir).and_return(true)
       allow(Dir).to receive(:mkdir)
       stub_request(:get, "https://api.bitrise.io/v0.1/apps/appslug123/builds/build789/artifacts/3301a655390a49e1").
         to_return(body: '{}', status: 400)

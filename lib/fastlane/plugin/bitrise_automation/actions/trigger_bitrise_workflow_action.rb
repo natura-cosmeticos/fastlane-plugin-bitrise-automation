@@ -12,7 +12,7 @@ module Fastlane
             type: "bitrise"
           },
           build_params: {
-            workflow_id: params[:workflow_name],
+            workflow_id: params[:workflow],
             commit_hash: params[:commit_hash],
             commit_message: params[:build_message]
           }
@@ -22,7 +22,6 @@ module Fastlane
           json_response = JSON.parse(response.body)
           UI.success("Build triggered successfully 🚀 URL: #{json_response['build_url']}")
           FastlaneCore::PrintTable.print_values(config: json_response,
-                                                hide_keys: [],
                                                 title: "Bitrise API response")
         else
           UI.crash!("Error requesting new build on Bitrise.io. Status code: #{response.code}. #{response}")
@@ -34,8 +33,8 @@ module Fastlane
         build_infos["build_number"] = json_response["build_number"]
         build_infos["build_slug"] = json_response["build_slug"]
 
-        unless params[:async]
-          build_status = self.wait_until_build_completion(params, build_infos["build_slug"])
+        if params[:wait_for_build]
+          build_status = wait_until_build_completion(params, build_infos["build_slug"])
 
           if build_status["status"] == 1
             UI.success("Build has finished successfully on Bitrise!")
@@ -51,9 +50,7 @@ module Fastlane
       def self.wait_until_build_completion(params, build_slug)
         build_status = {}
         loop do
-          build_status_params = params.clone
-          build_status_params[:build_slug] = build_slug
-          build_status = GetBitriseBuildStatusAction.run(build_status_params)
+          build_status = BitriseBuildStatusAction.get_status(params, build_slug)
 
           break if build_status['status'] != 0
 
@@ -83,36 +80,36 @@ module Fastlane
       def self.available_options
         [
           FastlaneCore::ConfigItem.new(key: :app_slug,
-                                  env_name: "BITRISE_AUTOMATION_APP_SLUG",
+                                  env_name: "BITRISE_APP_SLUG",
                                description: "The app slug of the project on Bitrise",
                                   optional: false,
                                       type: String),
           FastlaneCore::ConfigItem.new(key: :access_token,
-                                  env_name: "BITRISE_AUTOMATION_ACCESS_TOKEN",
+                                  env_name: "BITRISE_ACCESS_TOKEN",
                                description: "The personal access token used to call Bitrise API",
                                   optional: false,
                                       type: String),
           FastlaneCore::ConfigItem.new(key: :workflow,
-                                  env_name: "BITRISE_AUTOMATION_WORKFLOW",
+                                  env_name: "BITRISE_WORKFLOW",
                                description: "The name of the workflow on Bitrise",
                                   optional: false,
                                       type: String),
           FastlaneCore::ConfigItem.new(key: :commit_hash,
-                                  env_name: "BITRISE_AUTOMATION_COMMIT_HASH",
+                                  env_name: "BITRISE_BUILD_COMMIT_HASH",
                                description: "The commit hash to be used on the build",
                                   optional: false,
                                       type: String),
           FastlaneCore::ConfigItem.new(key: :build_message,
-                                  env_name: "BITRISE_AUTOMATION_BUILD_MESSAGE",
+                                  env_name: "BITRISE_BUILD_MESSAGE",
                                description: "A custom message that will be used to identify the build",
                                   optional: false,
                                       type: String),
-          FastlaneCore::ConfigItem.new(key: :async,
-                                  env_name: "BITRISE_AUTOMATION_ASYNC",
-                               description: "Whether the action should return immediately after requesting the build or wait until it finishes running",
+          FastlaneCore::ConfigItem.new(key: :wait_for_build,
+                                  env_name: "BITRISE_WAIT_FOR_BUILD",
+                               description: "Whether the action should wait until the build finishes or return immediately after requesting the build",
                                   optional: true,
-                                      type: Boolean,
-                             default_value: true)
+                             default_value: false,
+                                 is_string: false)
         ]
       end
 

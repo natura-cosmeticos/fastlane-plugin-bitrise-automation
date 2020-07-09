@@ -13,6 +13,8 @@ module Fastlane
           UI.crash!("Error fetching build artifacts list on Bitrise.io. Status code: #{response.code}. #{response}")
         end
 
+        UI.message("Found #{json_response.size} artifacts on Bitrise for build #{params[:build_slug]}.")
+
         artifacts = json_response.map do |artifact|
           {
             "title" => artifact["title"],
@@ -22,16 +24,21 @@ module Fastlane
           }
         end
 
+        artifacts.each do |artifact|
+          FastlaneCore::PrintTable.print_values(config: artifact,
+                                                title: artifact['title'])
+        end
+
         if params[:download]
           artifacts_dir = 'artifacts'
-          UI.verbose("Creating artifacts directory at '#{artifacts_dir}'...")
+          UI.message("Download option is on. Will start download of #{artifacts.size} artifacts to #{artifacts_dir}.")
           Dir.mkdir(artifacts_dir) unless Dir.exist?(artifacts_dir)
 
           artifacts.each do |artifact|
             UI.message("Fetching artifact '#{artifact['title']}' of type '#{artifact['artifact_type']}' (#{artifact['file_size_bytes']} bytes)...")
             artifact_details = get_artifact_details(params, artifact['slug'])
 
-            download_artifact(artifact_details)
+            download_artifact(artifact_details, artifacts_dir)
             UI.message("Finished downloading artifact '#{artifact['title']}'.")
           end
         end
@@ -51,13 +58,11 @@ module Fastlane
         json_response
       end
 
-      def self.download_artifact(artifact)
+      def self.download_artifact(artifact, dir)
         file_name = artifact['title']
         url = artifact['expiring_download_url']
 
-        Dir.chdir('..') do
-          sh("curl --fail --silent -o 'artifacts/#{file_name}' '#{url}'")
-        end
+        sh("curl --fail --silent -o '#{dir}/#{file_name}' '#{url}'")
       end
 
       def self.description
@@ -75,26 +80,26 @@ module Fastlane
       def self.available_options
         [
           FastlaneCore::ConfigItem.new(key: :app_slug,
-                                  env_name: "BITRISE_AUTOMATION_APP_SLUG",
+                                  env_name: "BITRISE_APP_SLUG",
                                description: "The app slug of the project on Bitrise",
                                   optional: false,
                                       type: String),
           FastlaneCore::ConfigItem.new(key: :access_token,
-                                  env_name: "BITRISE_AUTOMATION_ACCESS_TOKEN",
+                                  env_name: "BITRISE_ACCESS_TOKEN",
                                description: "The personal access token used to call Bitrise API",
                                   optional: false,
                                       type: String),
           FastlaneCore::ConfigItem.new(key: :build_slug,
-                                  env_name: "BITRISE_AUTOMATION_BUILD_SLUG",
+                                  env_name: "BITRISE_BUILD_SLUG",
                                description: "The slug that identifies the build on Bitrise",
                                   optional: false,
                                       type: String),
           FastlaneCore::ConfigItem.new(key: :download,
-                                  env_name: "BITRISE_AUTOMATION_BUILD_ARTIFACTS_DOWNLOAD",
+                                  env_name: "BITRISE_ARTIFACTS_DOWNLOAD",
                                description: "Whether to download or not the produced artifacts",
                                   optional: true,
-                                      type: Boolean,
-                             default_value: false)
+                             default_value: false,
+                                 is_string: false)
         ]
       end
 

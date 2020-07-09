@@ -20,7 +20,7 @@ module Fastlane
 
         if response.code == "201"
           json_response = JSON.parse(response.body)
-          UI.success("Build triggered successfully 🚀 URL: #{json_response['build_url']}")
+          UI.success("Build #{json_response['build_number']} triggered successfully on Bitrise 🚀 URL: #{json_response['build_url']}")
           FastlaneCore::PrintTable.print_values(config: json_response,
                                                 title: "Bitrise API response")
         else
@@ -40,7 +40,7 @@ module Fastlane
             UI.success("Build has finished successfully on Bitrise!")
             build_infos["status"] = build_status["status_text"]
           elsif build_status["status"] == 2
-            UI.build_failure!("Build has FAILED. Check Bitrise for details.")
+            UI.build_failure!("Build has FAILED on Bitrise. Check more details at #{build_infos["build_url"]}.")
           end
         end
 

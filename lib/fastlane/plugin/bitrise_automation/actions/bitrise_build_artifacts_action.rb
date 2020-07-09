@@ -29,9 +29,9 @@ module Fastlane
                                                 title: artifact['title'])
         end
 
-        if params[:download]
+        if params[:download] && !artifacts.empty?
           artifacts_dir = 'artifacts'
-          UI.message("Download option is on. Will start download of #{artifacts.size} artifacts to #{artifacts_dir}.")
+          UI.message("Download option is on. Will start download of #{artifacts.size} artifacts to '#{artifacts_dir}'.")
           Dir.mkdir(artifacts_dir) unless Dir.exist?(artifacts_dir)
 
           artifacts.each do |artifact|

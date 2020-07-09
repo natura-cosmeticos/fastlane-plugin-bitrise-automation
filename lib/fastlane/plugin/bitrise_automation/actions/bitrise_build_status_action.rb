@@ -5,7 +5,10 @@ module Fastlane
   module Actions
     class BitriseBuildStatusAction < Action
       def self.run(params)
-        get_status(params, params[:build_slug])
+        status = get_status(params, params[:build_slug])
+        FastlaneCore::PrintTable.print_values(config: status,
+                                              title: "Bitrise build '#{params[:build_slug]}' status")
+        status
       end
 
       def self.get_status(params, build_slug)
@@ -13,8 +16,6 @@ module Fastlane
 
         if response.code == "200"
           json_response = JSON.parse(response.body)['data']
-          FastlaneCore::PrintTable.print_values(config: json_response,
-                                                title: "Bitrise build #{build_slug} status")
         else
           UI.crash!("Error fetching build status on Bitrise.io. Status code: #{response.code}. #{response}")
         end

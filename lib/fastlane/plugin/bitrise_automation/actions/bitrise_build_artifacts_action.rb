@@ -5,7 +5,11 @@ module Fastlane
   module Actions
     class BitriseBuildArtifactsAction < Action
       def self.run(params)
-        response = Helper::BitriseRequestHelper.get(params, "builds/#{params[:build_slug]}/artifacts")
+        get_artifacts(params, params[:build_slug])
+      end
+
+      def self.get_artifacts(params, build_slug)
+        response = Helper::BitriseRequestHelper.get(params, "builds/#{build_slug}/artifacts")
 
         if response.code == "200"
           json_response = JSON.parse(response.body)['data']
@@ -13,7 +17,7 @@ module Fastlane
           UI.crash!("Error fetching build artifacts list on Bitrise.io. Status code: #{response.code}. #{response}")
         end
 
-        UI.message("Found #{json_response.size} artifacts on Bitrise for build #{params[:build_slug]}.")
+        UI.message("Found #{json_response.size} artifacts on Bitrise for build #{build_slug}.")
 
         artifacts = json_response.map do |artifact|
           {
@@ -29,14 +33,14 @@ module Fastlane
                                                 title: artifact['title'])
         end
 
-        if params[:download] && !artifacts.empty?
+        if params[:download_artifacts] && !artifacts.empty?
           artifacts_dir = 'artifacts'
           UI.message("Download option is on. Will start download of #{artifacts.size} artifacts to '#{artifacts_dir}'.")
           Dir.mkdir(artifacts_dir) unless Dir.exist?(artifacts_dir)
 
           artifacts.each do |artifact|
             UI.message("Fetching artifact '#{artifact['title']}' of type '#{artifact['artifact_type']}' (#{artifact['file_size_bytes']} bytes)...")
-            artifact_details = get_artifact_details(params, artifact['slug'])
+            artifact_details = get_artifact_details(params, build_slug, artifact['slug'])
 
             download_artifact(artifact_details, artifacts_dir)
             UI.message("Finished downloading artifact '#{artifact['title']}'.")
@@ -46,8 +50,8 @@ module Fastlane
         artifacts
       end
 
-      def self.get_artifact_details(params, artifact_slug)
-        response = Helper::BitriseRequestHelper.get(params, "builds/#{params[:build_slug]}/artifacts/#{artifact_slug}")
+      def self.get_artifact_details(params, build_slug, artifact_slug)
+        response = Helper::BitriseRequestHelper.get(params, "builds/#{build_slug}/artifacts/#{artifact_slug}")
 
         if response.code == "200"
           json_response = JSON.parse(response.body)['data']
@@ -94,8 +98,8 @@ module Fastlane
                                description: "The slug that identifies the build on Bitrise",
                                   optional: false,
                                       type: String),
-          FastlaneCore::ConfigItem.new(key: :download,
-                                  env_name: "BITRISE_ARTIFACTS_DOWNLOAD",
+          FastlaneCore::ConfigItem.new(key: :download_artifacts,
+                                  env_name: "BITRISE_DOWNLOAD_ARTIFACTS",
                                description: "Whether to download or not the produced artifacts",
                                   optional: true,
                              default_value: false,

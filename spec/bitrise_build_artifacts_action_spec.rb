@@ -82,7 +82,7 @@ describe Fastlane::Actions::BitriseBuildArtifactsAction do
       response = Fastlane::Actions::BitriseBuildArtifactsAction.run(
         app_slug: "appslug123",
         build_slug: "build789",
-        download: true
+        download_artifacts: true
       )
 
       expect(Dir).to have_received(:mkdir).with(expected_download_dir)
@@ -95,7 +95,7 @@ describe Fastlane::Actions::BitriseBuildArtifactsAction do
       response = Fastlane::Actions::BitriseBuildArtifactsAction.run(
         app_slug: "appslug123",
         build_slug: "build789",
-        download: true
+        download_artifacts: true
       )
 
       expect(Dir).not_to(have_received(:mkdir).with(expected_download_dir))
@@ -109,7 +109,7 @@ describe Fastlane::Actions::BitriseBuildArtifactsAction do
       response = Fastlane::Actions::BitriseBuildArtifactsAction.run(
         app_slug: "appslug123",
         build_slug: "build789",
-        download: true
+        download_artifacts: true
       )
 
       expect(Fastlane::Actions::BitriseBuildArtifactsAction).to have_received(:sh).with("curl --fail --silent -o 'artifacts/file.json' 'https://bitrise-artifacts.example.com/3301a655390a49e1'")
@@ -125,7 +125,7 @@ describe Fastlane::Actions::BitriseBuildArtifactsAction do
         response = Fastlane::Actions::BitriseBuildArtifactsAction.run(
           app_slug: "appslug123",
           build_slug: "build789",
-          download: true
+          download_artifacts: true
         )
       end.to raise_error(FastlaneCore::Interface::FastlaneCrash)
     end

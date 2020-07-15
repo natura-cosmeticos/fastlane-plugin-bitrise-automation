@@ -56,6 +56,79 @@ describe Fastlane::Actions::TriggerBitriseWorkflowAction do
     end
   end
 
+  describe 'when download_artifact is turned on' do
+    before(:each) do
+      build_artifacts_success = {
+        "data" => [
+          {
+            "title" => "file.json",
+            "artifact_type" => "file",
+            "artifact_meta" => nil,
+            "is_public_page_enabled" => false,
+            "slug" => "3301a655390a49e1",
+            "file_size_bytes" => 375
+          }
+        ],
+        "paging" => {
+          "page_item_limit" => 10,
+          "total_item_count" => 1
+        }
+      }.to_json
+
+      artifact_details_success = {
+        "data" => {
+          "title" => "file.json",
+          "artifact_type" => "file",
+          "artifact_meta" => nil,
+          "expiring_download_url" => "https://bitrise-artifacts.example.com/3301a655390a49e1",
+          "is_public_page_enabled" => false,
+          "slug" => "3301a655390a49e1",
+          "public_install_page_url" => "",
+          "file_size_bytes" => 375
+        }
+      }.to_json
+
+      artifact_json_file = {
+        "output" => "whatever"
+      }.to_json
+
+      stub_request(:get, "https://api.bitrise.io/v0.1/apps/appslug123/builds/abc123/artifacts").
+        to_return(body: build_artifacts_success, status: 200)
+      stub_request(:get, "https://api.bitrise.io/v0.1/apps/appslug123/builds/abc123/artifacts/3301a655390a49e1").
+        to_return(body: artifact_details_success, status: 200)
+      stub_request(:get, "https://bitrise-artifacts.example.com/3301a655390a49e1").
+        to_return(body: artifact_json_file, status: 200)
+
+      build_details_success = {
+        "data" => {
+          "is_on_hold" => false,
+          "status" => 1,
+          "status_text" => "success"
+        }
+      }.to_json
+      stub_request(:post, "https://api.bitrise.io/v0.1/apps/appslug123/builds").
+        to_return(body: build_created_response, status: 201)
+      stub_request(:get, "https://api.bitrise.io/v0.1/apps/appslug123/builds/abc123").
+        to_return(body: build_details_success, status: 200)
+    end
+
+    it 'downloads the artifacts' do
+      allow(Fastlane::Actions::BitriseBuildArtifactsAction).to receive(:download_artifact)
+
+      response = Fastlane::Actions::TriggerBitriseWorkflowAction.run(
+        app_slug: "appslug123",
+        workflow: "workflow_name",
+        commit_hash: "commit_hash",
+        build_message: "build_message",
+        download_artifacts: true,
+        wait_for_build: true
+      )
+
+      expect(Fastlane::Actions::BitriseBuildArtifactsAction)
+        .to have_received(:download_artifact)
+    end
+  end
+
   describe 'when wait_for_build is turned on' do
     it 'queries the status after triggering the build' do
       build_details_success = {

@@ -35,12 +35,14 @@ module Fastlane
 
         if params[:wait_for_build]
           build_status = wait_until_build_completion(params, build_infos["build_slug"])
-
+          if params[:download_artifacts]
+            BitriseBuildArtifactsAction.get_artifacts(params, build_infos["build_slug"])
+          end
           if build_status["status"] == 1
             UI.success("Build has finished successfully on Bitrise!")
             build_infos["status"] = build_status["status_text"]
           elsif build_status["status"] == 2
-            UI.build_failure!("Build has FAILED on Bitrise. Check more details at #{build_infos["build_url"]}.")
+            UI.build_failure!("Build has FAILED on Bitrise. Check more details at #{build_infos['build_url']}.")
           end
         end
 
@@ -107,6 +109,12 @@ module Fastlane
           FastlaneCore::ConfigItem.new(key: :wait_for_build,
                                   env_name: "BITRISE_WAIT_FOR_BUILD",
                                description: "Whether the action should wait until the build finishes or return immediately after requesting the build",
+                                  optional: true,
+                             default_value: false,
+                                 is_string: false),
+          FastlaneCore::ConfigItem.new(key: :download_artifacts,
+                                  env_name: "BITRISE_DOWNLOAD_ARTIFACTS",
+                               description: "Whether to download or not the produced artifacts",
                                   optional: true,
                              default_value: false,
                                  is_string: false)

@@ -75,6 +75,7 @@ The returned value is a hash containing the information about the build status.
 | `status` | The status of the build: not finished (0), successful (1), failed (2), aborted with failure (3), aborted with success (4) |
 | `status_text` | The status text |
 | `is_on_hold` | Indicates whether the build has started yet (true: the build hasn't started) |
+| `abort_reason` | If the build has been aborted, indicates the reason why |
 
 ### bitrise_build_artifacts
 Use this action to retrieve information about the artifacts of a build or to automatically download them from Bitrise.

@@ -186,13 +186,90 @@ describe Fastlane::Actions::TriggerBitriseWorkflowAction do
       expect(response['status']).to eq("success")
     end
 
-    it 'throws a build failure error if the build has failed' do
+    it 'throws a build failure error if the build has failed with status of failure (2)' do
       allow_any_instance_of(Object).to receive(:sleep)
       build_details_failure = {
         "data" => {
           "is_on_hold" => false,
           "status" => 2,
           "status_text" => "failed"
+        }
+      }.to_json
+      stub_request(:post, "https://api.bitrise.io/v0.1/apps/appslug123/builds").
+        to_return(body: build_created_response, status: 201)
+      stub_request(:get, "https://api.bitrise.io/v0.1/apps/appslug123/builds/abc123").
+        to_return(body: build_details_failure, status: 200)
+
+      expect do
+        response = Fastlane::Actions::TriggerBitriseWorkflowAction.run(
+          app_slug: "appslug123",
+          workflow: "workflow_name",
+          commit_hash: "commit_hash",
+          build_message: "build_message",
+          wait_for_build: true
+        )
+      end.to raise_error(FastlaneCore::Interface::FastlaneBuildFailure)
+    end
+
+    it 'throws a build failure error if the build has failed with status aborted (3)' do
+      allow_any_instance_of(Object).to receive(:sleep)
+      build_details_failure = {
+        "data" => {
+          "is_on_hold" => false,
+          "status" => 3,
+          "status_text" => "aborted",
+          "abort_reason" => "build aborted"
+        }
+      }.to_json
+      stub_request(:post, "https://api.bitrise.io/v0.1/apps/appslug123/builds").
+        to_return(body: build_created_response, status: 201)
+      stub_request(:get, "https://api.bitrise.io/v0.1/apps/appslug123/builds/abc123").
+        to_return(body: build_details_failure, status: 200)
+
+      expect do
+        response = Fastlane::Actions::TriggerBitriseWorkflowAction.run(
+          app_slug: "appslug123",
+          workflow: "workflow_name",
+          commit_hash: "commit_hash",
+          build_message: "build_message",
+          wait_for_build: true
+        )
+      end.to raise_error(FastlaneCore::Interface::FastlaneBuildFailure)
+    end
+
+    it 'throws a build failure error if the build has failed with status aborted (4)' do
+      allow_any_instance_of(Object).to receive(:sleep)
+      build_details_failure = {
+        "data" => {
+          "is_on_hold" => false,
+          "status" => 4,
+          "status_text" => "aborted",
+          "abort_reason" => "build aborted"
+        }
+      }.to_json
+      stub_request(:post, "https://api.bitrise.io/v0.1/apps/appslug123/builds").
+        to_return(body: build_created_response, status: 201)
+      stub_request(:get, "https://api.bitrise.io/v0.1/apps/appslug123/builds/abc123").
+        to_return(body: build_details_failure, status: 200)
+
+      expect do
+        response = Fastlane::Actions::TriggerBitriseWorkflowAction.run(
+          app_slug: "appslug123",
+          workflow: "workflow_name",
+          commit_hash: "commit_hash",
+          build_message: "build_message",
+          wait_for_build: true
+        )
+      end.to raise_error(FastlaneCore::Interface::FastlaneBuildFailure)
+    end
+
+    it 'throws a build failure error if the build has failed with unknown status' do
+      allow_any_instance_of(Object).to receive(:sleep)
+      build_details_failure = {
+        "data" => {
+          "is_on_hold" => false,
+          "status" => 666,
+          "status_text" => "aborted"
         }
       }.to_json
       stub_request(:post, "https://api.bitrise.io/v0.1/apps/appslug123/builds").

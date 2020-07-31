@@ -5,7 +5,8 @@ describe Fastlane::Actions::BitriseBuildStatusAction do
         "data" => {
           "is_on_hold" => false,
           "status" => 1,
-          "status_text" => "success"
+          "status_text" => "success",
+          "abort_reason" => "bla"
         }
       }.to_json
       stub_request(:get, "https://api.bitrise.io/v0.1/apps/appslug123/builds/build789").
@@ -19,6 +20,7 @@ describe Fastlane::Actions::BitriseBuildStatusAction do
       expect(response['status']).to eq(1)
       expect(response['status_text']).to eq("success")
       expect(response['is_on_hold']).to eq(false)
+      expect(response['abort_reason']).to eq("bla")
     end
 
     it 'crashes when the Bitrise API returns an unexpected status code' do

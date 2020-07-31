@@ -24,6 +24,7 @@ module Fastlane
         build_infos["is_on_hold"] = json_response["is_on_hold"]
         build_infos["status"] = json_response["status"]
         build_infos["status_text"] = json_response["status_text"]
+        build_infos["abort_reason"] = json_response["abort_reason"]
         build_infos
       end
 

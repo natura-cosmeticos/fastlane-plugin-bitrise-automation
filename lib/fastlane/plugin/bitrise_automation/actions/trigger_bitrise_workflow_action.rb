@@ -5,7 +5,7 @@ module Fastlane
   module Actions
     class TriggerBitriseWorkflowAction < Action
       def self.run(params)
-        UI.verbose("Requesting new Bitrise.io build...")
+        UI.message("Requesting new Bitrise.io build for workflow '#{params[:workflow]}'...")
 
         response = Helper::BitriseRequestHelper.post(params, 'builds', {
           hook_info: {
@@ -24,7 +24,7 @@ module Fastlane
           FastlaneCore::PrintTable.print_values(config: json_response,
                                                 title: "Bitrise API response")
         else
-          UI.crash!("Error requesting new build on Bitrise.io. Status code: #{response.code}. #{response}")
+          UI.crash!("Error requesting new build on Bitrise.io. Status code: #{response.code}. #{response.body}")
         end
 
         build_infos = {}
@@ -35,14 +35,20 @@ module Fastlane
 
         if params[:wait_for_build]
           build_status = wait_until_build_completion(params, build_infos["build_slug"])
+
           if params[:download_artifacts]
             BitriseBuildArtifactsAction.get_artifacts(params, build_infos["build_slug"])
           end
+
+          build_infos["status"] = build_status["status_text"]
           if build_status["status"] == 1
             UI.success("Build has finished successfully on Bitrise!")
-            build_infos["status"] = build_status["status_text"]
           elsif build_status["status"] == 2
             UI.build_failure!("Build has FAILED on Bitrise. Check more details at #{build_infos['build_url']}.")
+          elsif build_status["status"] == 3 || build_status["status"] == 4
+            UI.build_failure!("Build has been ABORTED on Bitrise. Abort reason: '#{build_status['abort_reason']}'. Check more details at #{build_infos['build_url']}.")
+          else
+            UI.build_failure!("Build has ended with unknown status on Bitrise: #{build_status}. Check more details at #{build_infos['build_url']}.")
           end
         end
 

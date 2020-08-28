@@ -40,6 +40,61 @@ describe Fastlane::Actions::TriggerBitriseWorkflowAction do
       expect(response['build_slug']).to eq("abc123")
     end
 
+    it 'calls the Bitrise API with the branch parameter when specified' do
+      expected_request_payload = {
+        hook_info: {
+          type: "bitrise"
+        },
+        build_params: {
+          workflow_id: "workflow_name",
+          branch: "branch_name",
+          commit_hash: "commit_hash",
+          commit_message: "build_message"
+        }
+      }
+      stub_trigger = stub_request(:post, "https://api.bitrise.io/v0.1/apps/appslug123/builds").
+                     with(body: expected_request_payload).
+                     to_return(body: build_created_response, status: 201)
+
+      response = Fastlane::Actions::TriggerBitriseWorkflowAction.run(
+        app_slug: "appslug123",
+        workflow: "workflow_name",
+        branch: "branch_name",
+        commit_hash: "commit_hash",
+        build_message: "build_message",
+        wait_for_build: false
+      )
+
+      assert_requested(stub_trigger)
+    end
+
+    it 'calls the Bitrise API without the branch parameter when specified as empty' do
+      expected_request_payload = {
+        hook_info: {
+          type: "bitrise"
+        },
+        build_params: {
+          workflow_id: "workflow_name",
+          commit_hash: "commit_hash",
+          commit_message: "build_message"
+        }
+      }
+      stub_trigger = stub_request(:post, "https://api.bitrise.io/v0.1/apps/appslug123/builds").
+                     with(body: expected_request_payload).
+                     to_return(body: build_created_response, status: 201)
+
+      response = Fastlane::Actions::TriggerBitriseWorkflowAction.run(
+        app_slug: "appslug123",
+        workflow: "workflow_name",
+        branch: "",
+        commit_hash: "commit_hash",
+        build_message: "build_message",
+        wait_for_build: false
+      )
+
+      assert_requested(stub_trigger)
+    end
+
     it 'crashes when the Bitrise API returns an unexpected status code' do
       stub_request(:post, "https://api.bitrise.io/v0.1/apps/appslug123/builds").
         to_return(body: '{}', status: 400)

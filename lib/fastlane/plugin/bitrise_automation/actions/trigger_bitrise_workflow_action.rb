@@ -7,15 +7,18 @@ module Fastlane
       def self.run(params)
         UI.message("Requesting new Bitrise.io build for workflow '#{params[:workflow]}'...")
 
+        build_params = {
+          workflow_id: params[:workflow],
+          commit_hash: params[:commit_hash],
+          commit_message: params[:build_message]
+        }
+        build_params[:branch] = params[:branch] unless params[:branch].nil? || params[:branch].empty?
+
         response = Helper::BitriseRequestHelper.post(params, 'builds', {
           hook_info: {
             type: "bitrise"
           },
-          build_params: {
-            workflow_id: params[:workflow],
-            commit_hash: params[:commit_hash],
-            commit_message: params[:build_message]
-          }
+          build_params: build_params
         }.to_json)
 
         if response.code == "201"
@@ -101,6 +104,11 @@ module Fastlane
                                   env_name: "BITRISE_WORKFLOW",
                                description: "The name of the workflow to trigger",
                                   optional: false,
+                                      type: String),
+          FastlaneCore::ConfigItem.new(key: :branch,
+                                  env_name: "BITRISE_BUILD_BRANCH",
+                               description: "The name of branch that will be checked out",
+                                  optional: true,
                                       type: String),
           FastlaneCore::ConfigItem.new(key: :commit_hash,
                                   env_name: "BITRISE_BUILD_COMMIT_HASH",

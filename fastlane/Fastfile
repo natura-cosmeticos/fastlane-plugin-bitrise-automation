@@ -5,7 +5,9 @@
 lane :test do
   build = trigger_bitrise_workflow(
     workflow: "build",
-    build_message: "Build triggered from Fastlane :)",
+    branch: "master",
+    build_message: "Test build",
+    triggered_by: "Fastlane Bitrise Automation plugin :)",
     wait_for_build: true # Disable this if you don't need to wait for the build results
   )
 

@@ -12,12 +12,12 @@ module Fastlane
             type: "bitrise"
           },
           build_params: {
-            workflow_id: params[:workflow],
-            commit_hash: params[:commit_hash],
-            commit_message: params[:build_message]
+            workflow_id: params[:workflow]
           }
         }
         trigger_payload[:build_params][:branch] = params[:branch] unless params[:branch].nil? || params[:branch].empty?
+        trigger_payload[:build_params][:commit_hash] = params[:commit_hash] unless params[:commit_hash].nil? || params[:commit_hash].empty?
+        trigger_payload[:build_params][:commit_message] = params[:build_message] unless params[:build_message].nil? || params[:build_message].empty?
         trigger_payload[:triggered_by] = params[:triggered_by] unless params[:triggered_by].nil? || params[:triggered_by].empty?
 
         response = Helper::BitriseRequestHelper.post(params, 'builds', trigger_payload.to_json)
@@ -114,12 +114,12 @@ module Fastlane
           FastlaneCore::ConfigItem.new(key: :commit_hash,
                                   env_name: "BITRISE_BUILD_COMMIT_HASH",
                                description: "The hash of the commit that will be checked out",
-                                  optional: false,
+                                  optional: true,
                                       type: String),
           FastlaneCore::ConfigItem.new(key: :build_message,
                                   env_name: "BITRISE_BUILD_MESSAGE",
                                description: "A custom message that will be used to identify the build",
-                                  optional: false,
+                                  optional: true,
                                       type: String),
           FastlaneCore::ConfigItem.new(key: :triggered_by,
                                   env_name: "BITRISE_BUILD_TRIGGERED_BY",

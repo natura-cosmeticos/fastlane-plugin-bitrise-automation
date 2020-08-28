@@ -28,7 +28,7 @@ This plugin assumes you already have an app configured on Bitrise and uses a Per
 
 ### Known issues
 
-- For now the only option is to trigger a build via a commit hash. It should be more flexible as Bitrise allows triggering by branch, tag, commit or default strategy.
+- Triggering a build with a tag is not yet implemented
 - The author option to trigger the build is not implemented
 - The environments option to trigger the build is not implemented
 - Pagination on API responses is not implemented
@@ -45,7 +45,7 @@ Use this action to trigger a workflow on Bitrise and query its status.
 | `app_slug` | The app slug of the project on Bitrise | BITRISE_APP_SLUG | |
 | `access_token` | The [personal access token](https://devcenter.bitrise.io/api/authentication/) used to call Bitrise API | BITRISE_ACCESS_TOKEN | |
 | `workflow` | The name of the workflow to trigger | BITRISE_WORKFLOW | |
-| `branch` | The name of branch that will be checked out (optional) | BITRISE_BUILD_BRANCH | |
+| `branch` | The name of branch that will be checked out | BITRISE_BUILD_BRANCH | |
 | `commit_hash` | The hash of the commit that will be checked out (overrides branch parameter) | BITRISE_BUILD_COMMIT_HASH | |
 | `build_message` | A custom message that will be used to identify the build | BITRISE_BUILD_MESSAGE | |
 | `triggered_by` | A custom message that will be used to identify where the build was triggered from (optional) | BITRISE_BUILD_TRIGGERED_BY | |

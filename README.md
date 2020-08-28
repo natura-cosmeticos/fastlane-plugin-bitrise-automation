@@ -48,6 +48,7 @@ Use this action to trigger a workflow on Bitrise and query its status.
 | `branch` | The name of branch that will be checked out (optional) | BITRISE_BUILD_BRANCH | |
 | `commit_hash` | The hash of the commit that will be checked out (overrides branch parameter) | BITRISE_BUILD_COMMIT_HASH | |
 | `build_message` | A custom message that will be used to identify the build | BITRISE_BUILD_MESSAGE | |
+| `triggered_by` | A custom message that will be used to identify where the build was triggered from (optional) | BITRISE_BUILD_TRIGGERED_BY | |
 | `wait_for_build` | Whether the action should wait until the build finishes or return immediately after requesting the build | BITRISE_WAIT_FOR_BUILD | false |
 | `download_artifacts` | Whether to download or not the produced artifacts | BITRISE_DOWNLOAD_ARTIFACTS | false |
 

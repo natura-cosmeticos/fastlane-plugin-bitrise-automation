@@ -7,19 +7,20 @@ module Fastlane
       def self.run(params)
         UI.message("Requesting new Bitrise.io build for workflow '#{params[:workflow]}'...")
 
-        build_params = {
-          workflow_id: params[:workflow],
-          commit_hash: params[:commit_hash],
-          commit_message: params[:build_message]
-        }
-        build_params[:branch] = params[:branch] unless params[:branch].nil? || params[:branch].empty?
-
-        response = Helper::BitriseRequestHelper.post(params, 'builds', {
+        trigger_payload = {
           hook_info: {
             type: "bitrise"
           },
-          build_params: build_params
-        }.to_json)
+          build_params: {
+            workflow_id: params[:workflow],
+            commit_hash: params[:commit_hash],
+            commit_message: params[:build_message]
+          }
+        }
+        trigger_payload[:build_params][:branch] = params[:branch] unless params[:branch].nil? || params[:branch].empty?
+        trigger_payload[:triggered_by] = params[:triggered_by] unless params[:triggered_by].nil? || params[:triggered_by].empty?
+
+        response = Helper::BitriseRequestHelper.post(params, 'builds', trigger_payload.to_json)
 
         if response.code == "201"
           json_response = JSON.parse(response.body)
@@ -119,6 +120,11 @@ module Fastlane
                                   env_name: "BITRISE_BUILD_MESSAGE",
                                description: "A custom message that will be used to identify the build",
                                   optional: false,
+                                      type: String),
+          FastlaneCore::ConfigItem.new(key: :triggered_by,
+                                  env_name: "BITRISE_BUILD_TRIGGERED_BY",
+                               description: "A custom message that will be used to identify where the build was triggered from",
+                                  optional: true,
                                       type: String),
           FastlaneCore::ConfigItem.new(key: :wait_for_build,
                                   env_name: "BITRISE_WAIT_FOR_BUILD",

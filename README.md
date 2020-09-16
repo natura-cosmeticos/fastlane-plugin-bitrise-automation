@@ -25,6 +25,7 @@ This plugin assumes you already have an app configured on Bitrise and uses a Per
 - Check build success/failure (exiting with success or failure according to the status on Bitrise)
 - Retrieve the list of artifacts from a build
 - Download the artifacts produced by a build
+- Automatic retry of requests when the connection to the Bitrise API fails or returns a 5xx error
 
 ### Known issues
 

@@ -9,7 +9,7 @@ module Fastlane
       class << self
         def get(params, path)
           request = Net::HTTP::Get.new("/v0.1/apps/#{params[:app_slug]}/#{path}", bitrise_headers(params[:access_token]))
-          bitrise_client.request(request)
+          request_with_retries(request)
         end
 
         def post(params, path, body)

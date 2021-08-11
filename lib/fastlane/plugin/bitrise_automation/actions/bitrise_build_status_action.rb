@@ -40,6 +40,10 @@ module Fastlane
         "Returns the information of the Bitrise build"
       end
 
+      def self.return_type
+        :hash
+      end
+
       def self.available_options
         [
           FastlaneCore::ConfigItem.new(key: :app_slug,

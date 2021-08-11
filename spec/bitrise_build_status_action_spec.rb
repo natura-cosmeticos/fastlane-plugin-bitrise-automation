@@ -35,4 +35,10 @@ describe Fastlane::Actions::BitriseBuildStatusAction do
       end.to raise_error(FastlaneCore::Interface::FastlaneCrash)
     end
   end
+
+  describe 'return type' do
+    it 'is :hash' do
+      expect(Fastlane::Actions::BitriseBuildStatusAction.return_type).to eq(:hash)
+    end
+  end
 end

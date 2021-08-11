@@ -399,4 +399,10 @@ describe Fastlane::Actions::TriggerBitriseWorkflowAction do
       end.to raise_error(FastlaneCore::Interface::FastlaneBuildFailure)
     end
   end
+
+  describe 'return type' do
+    it 'is :hash' do
+      expect(Fastlane::Actions::TriggerBitriseWorkflowAction.return_type).to eq(:hash)
+    end
+  end
 end
